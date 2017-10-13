@@ -26,12 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Set;
 
-import com.pff.PSTAttachment;
-import com.pff.PSTException;
-import com.pff.PSTFile;
-import com.pff.PSTFolder;
-import com.pff.PSTMessage;
-import com.pff.PSTRecipient;
+import com.pff.*;
 import org.apache.poi.ss.formula.functions.T;
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.extractor.EmbeddedDocumentExtractor;
@@ -164,8 +159,14 @@ public class OutlookPSTParser extends AbstractParser {
         mailMetadata.set("importance", valueOf(pstMail.getImportance()));
         mailMetadata.set("priority", valueOf(pstMail.getPriority()));
         mailMetadata.set("flagged", valueOf(pstMail.isFlagged()));
-        mailMetadata.set(Office.MAPI_MESSAGE_CLASS,
-                OutlookExtractor.getMessageClass(pstMail.getMessageClass()));
+
+        String messageClass = OutlookExtractor.getMessageClass(pstMail.getMessageClass());
+        mailMetadata.set(Office.MAPI_MESSAGE_CLASS, messageClass);
+
+        if(messageClass.equals("APPOINTMENT")) {
+                PSTAppointment appointment = (PSTAppointment) pstMail;
+                mailMetadata.set("appointmentIsRecurring", valueOf(appointment.isRecurring()));
+        }
 
         mailMetadata.set(Message.MESSAGE_FROM_EMAIL, pstMail.getSenderEmailAddress());
 
